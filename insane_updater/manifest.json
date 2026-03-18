@@ -1,0 +1,12 @@
+{
+  "domain": "insane_updater",
+  "name": "Insane Updater",
+  "codeowners": ["@Jules"],
+  "config_flow": true,
+  "dependencies": [],
+  "documentation": "https://github.com/Jules/insane_updater",
+  "integration_type": "hub",
+  "iot_class": "cloud_polling",
+  "requirements": [],
+  "version": "1.0.0"
+}
