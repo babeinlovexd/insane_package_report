@@ -4,7 +4,7 @@
   "codeowners": ["@jules"],
   "config_flow": true,
   "dependencies": ["esphome"],
-  "documentation": "https://github.com/insane_updater",
+  "documentation": "https://github.com/babeinlovexd/insane_package_report",
   "integration_type": "hub",
   "iot_class": "cloud_polling",
   "requirements": [],
