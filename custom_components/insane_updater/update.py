@@ -121,7 +121,13 @@ class InsanePackageUpdateEntity(CoordinatorEntity[GitHubPackageCoordinator], Upd
         """Return device registry information for this entity."""
         registry = dr.async_get(self.hass)
         device = registry.async_get(self._device_id)
+
+        # When attaching entities to an existing device created by another integration
+        # (like ESPHome), we ONLY provide the identifiers. Providing anything else,
+        # especially connections, causes the device registry to update the device and
+        # can break the original integration's connection.
         if device:
+            # We must return a list of tuples or set of tuples for identifiers
             return {
                 "identifiers": device.identifiers,
             }
@@ -129,8 +135,6 @@ class InsanePackageUpdateEntity(CoordinatorEntity[GitHubPackageCoordinator], Upd
         # Fallback if device somehow not found, though we checked in __init__.py
         return {
             "identifiers": {("esphome", self._device_id)},
-            "default_manufacturer": "ESPHome",
-            "default_model": "Custom Component",
         }
 
     @property
