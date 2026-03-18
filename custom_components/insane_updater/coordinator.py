@@ -2,23 +2,25 @@ import logging
 from typing import Any
 
 from homeassistant.core import HomeAssistant
+from datetime import timedelta
+
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 
-from .const import DOMAIN, UPDATE_INTERVAL
+from .const import DOMAIN
 
 _LOGGER = logging.getLogger(__name__)
 
 class GitHubPackageCoordinator(DataUpdateCoordinator):
     """Coordinator to fetch GitHub package version info."""
 
-    def __init__(self, hass: HomeAssistant, token: str, url: str, ref: str, pkg_type: str) -> None:
+    def __init__(self, hass: HomeAssistant, token: str, url: str, ref: str, pkg_type: str, update_interval: int) -> None:
         """Initialize."""
         super().__init__(
             hass,
             _LOGGER,
             name=f"Insane Updater {url}",
-            update_interval=UPDATE_INTERVAL,
+            update_interval=timedelta(hours=update_interval),
         )
         self.token = token
         self.url = url
