@@ -52,7 +52,10 @@ async def async_setup_entry(
         )
 
         async def fetch_and_add():
-            await coordinator.async_config_entry_first_refresh()
+            try:
+                await coordinator.async_config_entry_first_refresh()
+            except Exception as ex:
+                _LOGGER.warning("First refresh failed for %s, adding entity anyway: %s", url, ex)
 
             entity = InsanePackageUpdateEntity(
                 coordinator, device_id, url, ref, pkg_type, store, stored_data
@@ -76,6 +79,7 @@ class InsanePackageUpdateEntity(CoordinatorEntity[GitHubPackageCoordinator], Upd
     _attr_device_class = UpdateDeviceClass.FIRMWARE
     _attr_supported_features = UpdateEntityFeature.RELEASE_NOTES
     _attr_icon = "mdi:github"
+    _attr_has_entity_name = True
 
     def __init__(
         self,
@@ -139,7 +143,7 @@ class InsanePackageUpdateEntity(CoordinatorEntity[GitHubPackageCoordinator], Upd
     def latest_version(self) -> str | None:
         """Latest version available for install."""
         if self.coordinator.data:
-            return self.coordinator.data.get("latest_commit")
+            return self.coordinator.data.get("latest_version")
         return None
 
     @property
