@@ -5,6 +5,7 @@
   "config_flow": true,
   "dependencies": ["esphome"],
   "documentation": "https://github.com/babeinlovexd/insane_package_report",
+  "issue_tracker": "https://github.com/babeinlovexd/insane_package_report/issues",
   "integration_type": "hub",
   "iot_class": "cloud_polling",
   "requirements": [],
