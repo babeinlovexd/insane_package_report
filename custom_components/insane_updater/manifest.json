@@ -1,7 +1,7 @@
 {
   "domain": "insane_updater",
   "name": "Insane Updater",
-  "codeowners": ["@jules"],
+  "codeowners": ["@babeinlovexd"],
   "config_flow": true,
   "dependencies": ["esphome"],
   "documentation": "https://github.com/babeinlovexd/insane_package_report",

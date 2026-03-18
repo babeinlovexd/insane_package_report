@@ -48,7 +48,7 @@ async def async_setup_entry(
             return
 
         coordinator = GitHubPackageCoordinator(
-            hass, domain_data["token"], url, ref, pkg_type
+            hass, domain_data["token"], url, ref, pkg_type, domain_data["update_interval"]
         )
 
         entity = InsanePackageUpdateEntity(

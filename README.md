@@ -12,7 +12,7 @@ Das Projekt besteht aus zwei Hauptkomponenten:
    Diese Komponente liest die rohe ESPHome-Konfiguration (`CORE.raw_config`) deines Geräts während der Kompilierung. Sie sucht nach `packages` und `external_components`, extrahiert deren GitHub-URLs und Refs (Tags/Branches) und brennt diese Informationen mit in die Firmware ein. Sobald der ESP mit Home Assistant verbunden ist (via Native API), feuert er die Liste seiner Repositories in Form von Home Assistant Custom Events (`esphome.insane_package_report`). Dabei wird ein asynchrones Delay zwischen jedem Event eingefügt, um zu verhindern, dass das 255-Zeichen-Limit für Events überschritten wird.
 
 2. **Home Assistant Integration (`insane_updater`)**
-   Die HA-Integration lauscht auf diese Custom Events. Wenn ein Event eintrifft, erkennt die Integration das meldende ESP-Gerät anhand seiner Device-ID in der Home Assistant Device Registry. Anschließend wird dynamisch (ohne Neustart!) eine Update-Entität (`UpdateEntity`) dem ESP-Gerät hinzugefügt. Ein `DataUpdateCoordinator` prüft einmal alle 24 Stunden per GitHub API auf neue Versionen:
+   Die HA-Integration lauscht auf diese Custom Events. Wenn ein Event eintrifft, erkennt die Integration das meldende ESP-Gerät anhand seiner Device-ID in der Home Assistant Device Registry. Anschließend wird dynamisch (ohne Neustart!) eine Update-Entität (`UpdateEntity`) dem ESP-Gerät hinzugefügt. Ein `DataUpdateCoordinator` prüft im eingestellten Intervall (1h, 3h, 6h, 12h oder 24h) per GitHub API auf neue Versionen:
    - Ist ein `ref` (z.B. Tag) konfiguriert, wird die `/tags` API geprüft, um neuere Tags zu finden.
    - Ist kein `ref` konfiguriert, wird der Commit-Hash des `default_branch` überprüft.
    Die installierten Versionen werden über den HA Storage Helper persistiert, sodass die Update-Entitäten auch nach einem Neustart von Home Assistant sofort wieder ihre korrekten Stati anzeigen.
@@ -38,7 +38,9 @@ Dies ist der einfachste und sicherste Weg für die meisten Nutzer.
 7. **Starte Home Assistant neu**.
 8. Gehe in Home Assistant zu **Einstellungen -> Geräte & Dienste -> Integration hinzufügen**.
 9. Suche nach **Insane Updater** und füge die Integration hinzu.
-10. *(Optional aber dringend empfohlen)*: Trage im Config Flow einen **GitHub Personal Access Token** ein. Ein Classic Token mit den Rechten `public_repo` reicht vollkommen aus. Ohne diesen Token stößt du bei vielen Anfragen schnell an das Rate-Limit von GitHub und Updates können nicht geprüft werden.
+10. Konfiguriere die Integration nach deinen Wünschen:
+    - **Update-Intervall:** Wähle, wie oft nach Updates gesucht werden soll (1h, 3h, 6h, 12h oder 24h).
+    - *(Optional aber dringend empfohlen)*: Trage einen **GitHub Personal Access Token** ein. Ein Classic Token mit den Rechten `public_repo` reicht vollkommen aus. Ohne diesen Token stößt du bei vielen Anfragen schnell an das Rate-Limit von GitHub und Updates können nicht geprüft werden.
 
 **Alternative: Manuelle Installation (Für Experten)**
 
