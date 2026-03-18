@@ -43,7 +43,7 @@ Dies ist der einfachste und sicherste Weg für die meisten Nutzer.
 **Alternative: Manuelle Installation (Für Experten)**
 
 1. Lade dir dieses Repository als ZIP-Datei herunter.
-2. Kopiere den gesamten Ordner `insane_updater` in das Verzeichnis `config/custom_components/` deiner Home Assistant Installation.
+2. Kopiere den gesamten Ordner `custom_components/insane_updater` in das Verzeichnis `config/custom_components/` deiner Home Assistant Installation.
 3. Fahre ab Schritt 7 der HACS-Anleitung fort.
 
 ### 2. ESPHome Component (`insane_package_report`)
