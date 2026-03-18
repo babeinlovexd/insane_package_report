@@ -63,7 +63,7 @@ external_components:
     refresh: 1d # Prüft einmal am Tag auf neue Versionen der Komponente
 ```
 
-*Falls du die Komponente trotzdem manuell installieren möchtest, kannst du den Ordner `insane_package_report` in das `custom_components` Verzeichnis deines ESPHome-Ordners kopieren.*
+*Falls du die Komponente trotzdem manuell installieren möchtest, kannst du den Ordner `components/insane_package_report` in das `custom_components` Verzeichnis deines ESPHome-Ordners kopieren.*
 
 ---
 
