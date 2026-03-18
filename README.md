@@ -32,7 +32,7 @@ Dies ist der einfachste und sicherste Weg für die meisten Nutzer.
 1. Öffne **HACS** in deinem Home Assistant.
 2. Klicke auf **Integrationen**.
 3. Klicke auf das **Drei-Punkte-Menü** oben rechts und wähle **Benutzerdefinierte Repositories**.
-4. Füge die URL dieses Repositories ein (z.B. `https://github.com/dein_user/insane_updater`) und wähle als Kategorie **Integration**.
+4. Füge die URL dieses Repositories ein (z.B. `https://github.com/babeinlovexd/insane_package_report`) und wähle als Kategorie **Integration**.
 5. Klicke auf **Hinzufügen**.
 6. Suche nun in HACS nach "Insane Updater" und klicke auf **Herunterladen**.
 7. **Starte Home Assistant neu**.
@@ -56,7 +56,7 @@ Füge diesen Block zu den `external_components` deines ESPs hinzu:
 external_components:
   - source:
       type: git
-      url: https://github.com/dein_user/insane_updater # Ersetze durch deine Repo-URL
+      url: https://github.com/babeinlovexd/insane_package_report
       components: [ insane_package_report ]
     refresh: 1d # Prüft einmal am Tag auf neue Versionen der Komponente
 ```
@@ -124,7 +124,7 @@ external_components:
   # Einbinden von Insane Package Report selbst!
   - source:
       type: git
-      url: https://github.com/dein_user/insane_updater
+      url: https://github.com/babeinlovexd/insane_package_report
       components: [ insane_package_report ]
     refresh: 1d
 ```
