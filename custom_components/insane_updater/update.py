@@ -51,14 +51,17 @@ async def async_setup_entry(
             hass, domain_data["token"], url, ref, pkg_type, domain_data["update_interval"]
         )
 
-        entity = InsanePackageUpdateEntity(
-            coordinator, device_id, url, ref, pkg_type, store, stored_data
-        )
+        async def fetch_and_add():
+            await coordinator.async_config_entry_first_refresh()
 
-        coordinators[entity_id] = {"coordinator": coordinator, "entity": entity}
+            entity = InsanePackageUpdateEntity(
+                coordinator, device_id, url, ref, pkg_type, store, stored_data
+            )
 
-        async_add_entities([entity])
-        hass.async_create_task(coordinator.async_config_entry_first_refresh())
+            coordinators[entity_id] = {"coordinator": coordinator, "entity": entity}
+            async_add_entities([entity])
+
+        hass.async_create_task(fetch_and_add())
 
     entry.async_on_unload(
         async_dispatcher_connect(
@@ -72,6 +75,7 @@ class InsanePackageUpdateEntity(CoordinatorEntity[GitHubPackageCoordinator], Upd
 
     _attr_device_class = UpdateDeviceClass.FIRMWARE
     _attr_supported_features = UpdateEntityFeature.RELEASE_NOTES
+    _attr_icon = "mdi:github"
 
     def __init__(
         self,
@@ -97,7 +101,7 @@ class InsanePackageUpdateEntity(CoordinatorEntity[GitHubPackageCoordinator], Upd
         if store_key in self._stored_data:
             self._installed_version = self._stored_data[store_key]
         else:
-            self._installed_version = self._ref
+            self._installed_version = self._ref if self._ref else "main"
 
         # Generate unique ID based on device and URL
         # Extract repo name for naming
