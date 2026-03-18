@@ -129,8 +129,6 @@ class InsanePackageUpdateEntity(CoordinatorEntity[GitHubPackageCoordinator], Upd
         # Fallback if device somehow not found, though we checked in __init__.py
         return {
             "identifiers": {("esphome", self._device_id)},
-            "default_manufacturer": "ESPHome",
-            "default_model": "Custom Component",
         }
 
     @property
