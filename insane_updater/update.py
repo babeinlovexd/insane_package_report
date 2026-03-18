@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import logging
-from typing import Any
 
 from homeassistant.components.update import (
     UpdateDeviceClass,
@@ -72,7 +71,7 @@ class InsanePackageUpdateEntity(CoordinatorEntity[GitHubPackageCoordinator], Upd
     """Representation of an Insane Package Update entity."""
 
     _attr_device_class = UpdateDeviceClass.FIRMWARE
-    _attr_supported_features = UpdateEntityFeature.RELEASE_NOTES | UpdateEntityFeature.INSTALL
+    _attr_supported_features = UpdateEntityFeature.RELEASE_NOTES
 
     def __init__(
         self,
@@ -95,16 +94,10 @@ class InsanePackageUpdateEntity(CoordinatorEntity[GitHubPackageCoordinator], Upd
 
         # Load installed version from store
         store_key = f"{self._device_id}_{self._url}"
-        self._store_key = store_key
-
-        # We start with the stored installed SHA if available, otherwise we'll resolve it
         if store_key in self._stored_data:
             self._installed_version = self._stored_data[store_key]
         else:
-            self._installed_version = None
-
-        # To track when the ESP reports a new ref
-        self._current_ref = self._ref
+            self._installed_version = self._ref
 
         # Generate unique ID based on device and URL
         # Extract repo name for naming
@@ -153,39 +146,11 @@ class InsanePackageUpdateEntity(CoordinatorEntity[GitHubPackageCoordinator], Upd
         return None
 
     @callback
-    def _handle_coordinator_update(self) -> None:
-        """Handle updated data from the coordinator."""
-        if not self.coordinator.data:
-            return
-
-        latest_commit = self.coordinator.data.get("latest_commit")
-
-        # If we have no installed version stored, assume the current latest commit is the installed one.
-        # This handles the initial setup where we only know the 'ref' from the ESP,
-        # but we need to store the actual SHA to track future updates.
-        if self._installed_version is None and latest_commit:
-            self._installed_version = latest_commit
-            self._stored_data[self._store_key] = self._installed_version
-            self.hass.async_create_task(self._store.async_save(self._stored_data))
-
-        super()._handle_coordinator_update()
-
-    @callback
     def async_update_installed_version(self, new_ref: str) -> None:
-        """Called when ESP reports an event. We check if the ref changed."""
-        if self._current_ref != new_ref:
-            # The ESP reported a different ref (e.g. user changed from 'main' to 'dev' in YAML).
-            # We don't know the SHA yet, so we clear the installed version.
-            # Next coordinator update will fetch the latest SHA for the new ref and set it as installed.
-            self._current_ref = new_ref
-            self.coordinator.ref = new_ref # Update coordinator's ref to fetch correct data
-            self._installed_version = None
-            self.hass.async_create_task(self.coordinator.async_request_refresh())
-
-    async def async_install(self, version: str | None, backup: bool, **kwargs: Any) -> None:
-        """Mark as installed. Usually called when user manually clicks Install in HA."""
-        if self.latest_version:
-            self._installed_version = self.latest_version
-            self._stored_data[self._store_key] = self._installed_version
-            await self._store.async_save(self._stored_data)
+        """Update the installed version and save to store."""
+        if self._installed_version != new_ref:
+            self._installed_version = new_ref
+            store_key = f"{self._device_id}_{self._url}"
+            self._stored_data[store_key] = new_ref
+            self.hass.async_create_task(self._store.async_save(self._stored_data))
             self.async_write_ha_state()

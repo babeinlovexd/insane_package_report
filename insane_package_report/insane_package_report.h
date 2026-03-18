@@ -16,13 +16,11 @@ struct Repository {
 class InsanePackageReport : public Component {
  public:
   void setup() override;
-  void loop() override;
   void add_repository(const std::string &url, const std::string &ref, const std::string &type);
 
  protected:
   std::vector<Repository> repositories_;
-  bool was_connected_{false};
-  void on_client_connected_();
+  void on_client_connected_(const std::string &client_address);
 };
 
 }  // namespace insane_package_report

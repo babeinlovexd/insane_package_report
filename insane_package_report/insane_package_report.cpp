@@ -9,21 +9,11 @@ namespace insane_package_report {
 static const char *const TAG = "insane_package_report";
 
 void InsanePackageReport::setup() {
-  if (api::global_api_server == nullptr) {
+  if (api::global_api_server != nullptr) {
+    api::global_api_server->add_client_connected_callback(
+        [this](const std::string &client_address) { this->on_client_connected_(client_address); });
+  } else {
     ESP_LOGE(TAG, "API Server not found. InsanePackageReport needs API to be configured.");
-  }
-}
-
-void InsanePackageReport::loop() {
-  if (api::global_api_server == nullptr)
-    return;
-
-  bool is_connected = api::global_api_server->is_connected();
-  if (is_connected && !this->was_connected_) {
-    this->was_connected_ = true;
-    this->on_client_connected_();
-  } else if (!is_connected && this->was_connected_) {
-    this->was_connected_ = false;
   }
 }
 
@@ -31,8 +21,8 @@ void InsanePackageReport::add_repository(const std::string &url, const std::stri
   this->repositories_.push_back({url, ref, type});
 }
 
-void InsanePackageReport::on_client_connected_() {
-  ESP_LOGD(TAG, "API Client connected. Sending %zu package reports.", this->repositories_.size());
+void InsanePackageReport::on_client_connected_(const std::string &client_address) {
+  ESP_LOGD(TAG, "API Client connected: %s. Sending %zu package reports.", client_address.c_str(), this->repositories_.size());
 
   // We send one event per repository with a delay to not overwhelm the connection and avoid the 255 char limit
   uint32_t delay_ms = 5000; // Start with 5 seconds delay to allow HA to finish setting up
