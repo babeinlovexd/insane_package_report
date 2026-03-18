@@ -1,6 +1,7 @@
 #include "insane_package_report.h"
 #include "esphome/core/log.h"
 #include "esphome/components/api/api_server.h"
+#include "esphome/components/api/custom_api_device.h"
 #include "esphome/core/application.h"
 
 namespace esphome {
@@ -8,10 +9,19 @@ namespace insane_package_report {
 
 static const char *const TAG = "insane_package_report";
 
+class InsanePackageAPI : public api::CustomAPIDevice {
+public:
+  void fire_event(const std::string &event_name, const std::map<std::string, std::string> &data) {
+    this->fire_homeassistant_event(event_name, data);
+  }
+};
+
 void InsanePackageReport::setup() {
   if (api::global_api_server != nullptr) {
-    api::global_api_server->add_client_connected_callback(
-        [this](const std::string &client_address) { this->on_client_connected_(client_address); });
+      // In ESPHome's new API trigger system, we need to bind our action to the trigger via an Automation
+      auto *action = new ClientConnectedAction(this);
+      auto *automation = new Automation<std::string, std::string>(api::global_api_server->get_client_connected_trigger());
+      automation->add_action(action);
   } else {
     ESP_LOGE(TAG, "API Server not found. InsanePackageReport needs API to be configured.");
   }
@@ -35,7 +45,9 @@ void InsanePackageReport::on_client_connected_(const std::string &client_address
     this->set_timeout(delay_ms, [url_copy, ref_copy, type_copy]() {
       if (api::global_api_server != nullptr && api::global_api_server->is_connected()) {
         ESP_LOGD(TAG, "Sending HA event: esphome.insane_package_report for %s", url_copy.c_str());
-        api::global_api_server->send_homeassistant_event("esphome.insane_package_report", {
+
+        InsanePackageAPI api_helper;
+        api_helper.fire_event("esphome.insane_package_report", {
           {"url", url_copy},
           {"ref", ref_copy},
           {"type", type_copy}
