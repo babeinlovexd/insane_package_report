@@ -124,7 +124,6 @@ class InsanePackageUpdateEntity(CoordinatorEntity[GitHubPackageCoordinator], Upd
         if device:
             return {
                 "identifiers": device.identifiers,
-                "connections": device.connections,
             }
 
         # Fallback if device somehow not found, though we checked in __init__.py
