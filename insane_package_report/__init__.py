@@ -61,13 +61,19 @@ async def to_code(config):
     var = cg.new_Pvariable(config[CONF_ID])
     await cg.register_component(var, config)
 
+    # We use this define to use custom API service functions
+    cg.add_define("USE_API_HOMEASSISTANT_SERVICES")
+    # ESPHome API trigger is enabled with this flag
+    cg.add_define("USE_API_CLIENT_CONNECTED_TRIGGER")
+
     repos = []
 
-    if "packages" in CORE.raw_config:
-        repos.extend(extract_github_info(CORE.raw_config["packages"], "packages"))
+    if hasattr(CORE, "raw_config"):
+        if "packages" in CORE.raw_config:
+            repos.extend(extract_github_info(CORE.raw_config["packages"], "packages"))
 
-    if "external_components" in CORE.raw_config:
-        repos.extend(extract_github_info(CORE.raw_config["external_components"], "external_components"))
+        if "external_components" in CORE.raw_config:
+            repos.extend(extract_github_info(CORE.raw_config["external_components"], "external_components"))
 
     for repo in repos:
         cg.add(var.add_repository(repo["url"], repo["ref"], repo["type"]))
