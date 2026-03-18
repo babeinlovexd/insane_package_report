@@ -21,17 +21,47 @@ Das Projekt besteht aus zwei Hauptkomponenten:
 
 ## 📥 Installation
 
-### 1. Home Assistant Integration installieren (`insane_updater`)
+Die Installation ist in zwei Schritte unterteilt: Du musst die Home Assistant Integration installieren, damit Updates angezeigt werden, und du musst deinen ESPHome-Code anpassen, damit dieser die verbauten Komponenten meldet.
 
-1. Kopiere den Ordner `insane_updater` in dein Verzeichnis `config/custom_components/` in Home Assistant.
-2. Starte Home Assistant neu.
-3. Gehe in Home Assistant zu **Einstellungen -> Geräte & Dienste -> Integration hinzufügen**.
-4. Suche nach **Insane Updater** und füge die Integration hinzu.
-5. *(Optional aber empfohlen)*: Trage im Config Flow einen **GitHub Personal Access Token** (Classic Token reicht, mit `public_repo` Rechten) ein. Dies schützt dich davor, in die GitHub API Rate Limits zu laufen.
+### 1. Home Assistant Integration (`insane_updater`)
 
-### 2. ESPHome Component installieren (`insane_package_report`)
+**Empfohlen: Installation via HACS (Home Assistant Community Store)**
 
-Kopiere den Ordner `insane_package_report` in dein ESPHome `custom_components` Verzeichnis (z. B. `config/esphome/custom_components/`).
+Dies ist der einfachste und sicherste Weg für die meisten Nutzer.
+
+1. Öffne **HACS** in deinem Home Assistant.
+2. Klicke auf **Integrationen**.
+3. Klicke auf das **Drei-Punkte-Menü** oben rechts und wähle **Benutzerdefinierte Repositories**.
+4. Füge die URL dieses Repositories ein (z.B. `https://github.com/dein_user/insane_updater`) und wähle als Kategorie **Integration**.
+5. Klicke auf **Hinzufügen**.
+6. Suche nun in HACS nach "Insane Updater" und klicke auf **Herunterladen**.
+7. **Starte Home Assistant neu**.
+8. Gehe in Home Assistant zu **Einstellungen -> Geräte & Dienste -> Integration hinzufügen**.
+9. Suche nach **Insane Updater** und füge die Integration hinzu.
+10. *(Optional aber dringend empfohlen)*: Trage im Config Flow einen **GitHub Personal Access Token** ein. Ein Classic Token mit den Rechten `public_repo` reicht vollkommen aus. Ohne diesen Token stößt du bei vielen Anfragen schnell an das Rate-Limit von GitHub und Updates können nicht geprüft werden.
+
+**Alternative: Manuelle Installation (Für Experten)**
+
+1. Lade dir dieses Repository als ZIP-Datei herunter.
+2. Kopiere den gesamten Ordner `insane_updater` in das Verzeichnis `config/custom_components/` deiner Home Assistant Installation.
+3. Fahre ab Schritt 7 der HACS-Anleitung fort.
+
+### 2. ESPHome Component (`insane_package_report`)
+
+Du musst keine Dateien manuell auf deinen Rechner herunterladen! Du kannst die Komponente direkt von GitHub über deine ESPHome YAML-Datei einbinden.
+
+Füge diesen Block zu den `external_components` deines ESPs hinzu:
+
+```yaml
+external_components:
+  - source:
+      type: git
+      url: https://github.com/dein_user/insane_updater # Ersetze durch deine Repo-URL
+      components: [ insane_package_report ]
+    refresh: 1d # Prüft einmal am Tag auf neue Versionen der Komponente
+```
+
+*Falls du die Komponente trotzdem manuell installieren möchtest, kannst du den Ordner `insane_package_report` in das `custom_components` Verzeichnis deines ESPHome-Ordners kopieren.*
 
 ---
 
@@ -39,42 +69,81 @@ Kopiere den Ordner `insane_package_report` in dein ESPHome `custom_components` V
 
 Damit dein ESPHome-Gerät seine genutzten Packages melden kann, musst du die Komponente in der YAML des jeweiligen Geräts aktivieren.
 
-Füge folgenden Block zu deiner ESPHome-Konfiguration hinzu:
+**Achtung:** Dies ist ein Dummy-Eintrag. Du musst einfach nur `insane_package_report:` ins Root-Level deiner YAML schreiben.
 
 ```yaml
-# Aktiviert den Insane Package Report
+# Aktiviert den Insane Package Report (Zwingend erforderlich!)
+insane_package_report:
+```
+
+### 💡 Detaillierte Beispiele
+
+Hier siehst du, wie `packages` und `external_components` üblicherweise eingebunden werden, damit Insane Updater sie erkennt:
+
+#### Beispiel 1: Einfaches Package von GitHub mit Versions-Tag
+```yaml
 insane_package_report:
 
-# Beispiel für Packages und External Components in deiner YAML:
 packages:
-  # Dieses Repo wird von Insane Updater erkannt
-  mein_paket:
-    github: mein_github_user/mein_cooles_repo
+  mein_smart_device:
+    # URL im Format benutzer/repo
+    github: jesserockz/esphome-smart-device
+    # Eine explizite Version (Tag oder Branch) ist für Updates sehr empfehlenswert!
     ref: v1.0.0
+    # Optional: Pfad zur YAML-Datei innerhalb des Repos
+    files:
+      - smart_device.yaml
+```
+
+#### Beispiel 2: External Component von GitHub
+```yaml
+insane_package_report:
 
 external_components:
-  # Dieses Repo wird ebenfalls erkannt
   - source:
       type: git
+      # Komplette GitHub-URL
       url: https://github.com/pr#1234
+      # Auf welchen Commit oder Branch soll geprüft werden?
       ref: fix-irgendwas
+    # Welche Komponenten sollen aus dem Repo geladen werden?
+    components: [ sensor, binary_sensor ]
+```
+
+#### Beispiel 3: Kombination von beidem
+```yaml
+insane_package_report:
+
+packages:
+  wifi_config:
+    github: mein_user/meine_esphome_configs
+    ref: main
+    files: [ wifi.yaml ]
+
+external_components:
+  # Einbinden von Insane Package Report selbst!
+  - source:
+      type: git
+      url: https://github.com/dein_user/insane_updater
+      components: [ insane_package_report ]
+    refresh: 1d
 ```
 
 **Was passiert nun?**
 1. Beim Klicken auf "Install" / "Compile" parst die `insane_package_report`-Komponente die obige Konfiguration.
-2. Sie merkt sich die Repositories `mein_github_user/mein_cooles_repo` (Tag `v1.0.0`) und das Pull-Request-Repo (`fix-irgendwas`).
+2. Sie merkt sich die Repositories (z.B. `jesserockz/esphome-smart-device` mit Tag `v1.0.0`) und das Pull-Request-Repo (`fix-irgendwas`).
 3. Nach dem Start des ESP-Geräts meldet es sich per API bei Home Assistant.
 4. Nach einem kurzen Delay feuert das Gerät Events an Home Assistant ab.
-5. Home Assistant fängt diese Events ab und erstellt unter dem ESP-Gerät zwei neue Update-Entitäten ("mein_cooles_repo Update" und "pr#1234 Update").
-6. Zeigt das Repo auf GitHub einen neueren Release oder Tag, meldet die Update-Entität ein verfügbares Update!
+5. Home Assistant fängt diese Events ab und erstellt unter dem ESP-Gerät neue Update-Entitäten ("esphome-smart-device Update" und "pr#1234 Update").
+6. Zeigt das Repo auf GitHub einen neueren Release oder Tag, meldet die Update-Entität in Home Assistant ein verfügbares Update! Du kannst dann einfach deine ESPHome YAML anpassen und neu flashen.
 
 ---
 
 ## 🛠 Fehlerbehebung
 
 - **Es tauchen keine Entitäten in HA auf?**
-  Prüfe, ob du die ESPHome-Komponente per `insane_package_report:` wirklich aktiviert hast und die Firmware erfolgreich auf den ESP geflasht wurde.
+  Prüfe, ob du die ESPHome-Komponente per `insane_package_report:` auf Root-Ebene wirklich aktiviert hast und die Firmware erfolgreich auf den ESP geflasht wurde.
 - **GitHub Rate Limit Error?**
-  Dies passiert, wenn HA zu oft die GitHub API ohne Token abfragt. Füge der HA-Integration einen Token hinzu, indem du die Integration über die UI konfigurierst oder löschst und neu hinzufügst.
+  Dies passiert, wenn HA zu oft die GitHub API ohne Token abfragt (was bei vielen Repos schnell passiert). Füge der HA-Integration einen Token hinzu, indem du die Integration über die UI konfigurierst oder löschst und neu hinzufügst.
 - **Wann werden die Sensoren erstellt?**
   Die Sensoren werden beim Start des ESPs an HA übertragen. Wird der ESP frisch gebootet (z.B. vom Strom getrennt und wieder eingesteckt), sendet er wenige Sekunden nach der Verbindung die Report-Events an Home Assistant.
