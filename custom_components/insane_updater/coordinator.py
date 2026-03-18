@@ -45,6 +45,7 @@ class GitHubPackageCoordinator(DataUpdateCoordinator):
 
         headers = {
             "Accept": "application/vnd.github.v3+json",
+            "User-Agent": "HomeAssistant-InsaneUpdater",
         }
         if self.token:
             headers["Authorization"] = f"token {self.token}"
