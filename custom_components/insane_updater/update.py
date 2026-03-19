@@ -43,9 +43,13 @@ async def async_setup_entry(
 
         if entity_id in coordinators:
             # Entity already exists, just update installed version if needed
-            entity = coordinators[entity_id]["entity"]
-            entity.async_update_installed_version(ref)
+            if coordinators[entity_id] is not None:
+                entity = coordinators[entity_id]["entity"]
+                entity.async_update_installed_version(ref)
             return
+
+        # Mark as being processed to prevent duplicate creation
+        coordinators[entity_id] = None
 
         coordinator = GitHubPackageCoordinator(
             hass, domain_data["token"], url, ref, pkg_type, domain_data["update_interval"]
@@ -77,7 +81,7 @@ class InsanePackageUpdateEntity(CoordinatorEntity[GitHubPackageCoordinator], Upd
     """Representation of an Insane Package Update entity."""
 
     _attr_device_class = UpdateDeviceClass.FIRMWARE
-    _attr_supported_features = UpdateEntityFeature.RELEASE_NOTES
+    _attr_supported_features = 0
     _attr_icon = "mdi:github"
     _attr_has_entity_name = True
 
