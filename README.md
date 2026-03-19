@@ -59,7 +59,7 @@ external_components:
   - source:
       type: git
       url: https://github.com/babeinlovexd/insane_package_report
-      components: [ insane_package_report ]
+    components: [ insane_package_report ]
     refresh: 1d # Prüft einmal am Tag auf neue Versionen der Komponente
 ```
 
