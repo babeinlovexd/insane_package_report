@@ -63,8 +63,6 @@ async def to_code(config):
 
     # We use this define to use custom API service functions
     cg.add_define("USE_API_HOMEASSISTANT_SERVICES")
-    # ESPHome API trigger is enabled with this flag
-    cg.add_define("USE_API_CLIENT_CONNECTED_TRIGGER")
 
     repos = []
 
