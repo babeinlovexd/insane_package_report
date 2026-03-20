@@ -79,7 +79,7 @@ class InsanePackageUpdateEntity(CoordinatorEntity[GitHubPackageCoordinator], Upd
     """Representation of an Insane Package Update entity."""
 
     _attr_device_class = UpdateDeviceClass.FIRMWARE
-    _attr_supported_features = 0
+    _attr_supported_features = UpdateEntityFeature(0)
     _attr_icon = "mdi:github"
     _attr_has_entity_name = True
 
