@@ -147,9 +147,9 @@ class InsanePackageUpdateEntity(CoordinatorEntity[GitHubPackageCoordinator], Upd
         # If no explicit version/ref was tracked and it's just defaulting to "main",
         # but the actual latest branch/version from GitHub is different, we align them
         # so it doesn't falsely report an update available forever.
-        if not self._ref and self.coordinator.data:
+        if self._ref in ["main", "master", "dev", "develop", ""] and self.coordinator.data:
             latest = self.coordinator.data.get("latest_version")
-            if latest and self._installed_version in ["main", "master", ""]:
+            if latest and self._installed_version in ["main", "master", "dev", "develop", ""]:
                 return latest
 
         return self._installed_version

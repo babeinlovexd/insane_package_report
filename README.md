@@ -82,6 +82,15 @@ api:
 insane_package_report:
 ```
 
+### 📌 Tags vs. Branches (WICHTIG für Update-Benachrichtigungen!)
+
+Damit die Integration dir **korrekt mitteilt, ob ein Update verfügbar ist**, musst du verstehen, wie Insane Updater die `ref` Eigenschaft in deiner ESPHome YAML interpretiert:
+
+- **Tags tracken (Updates werden gemeldet):**
+  Wenn du eine feste Version wie `ref: v1.0.0` angibst, schaut die Integration auf GitHub nach, ob ein neuerer Release-Tag existiert (z.B. `v1.0.1`). Ist das der Fall, erscheint in Home Assistant die Meldung "Update verfügbar". **Das ist der empfohlene Weg!**
+- **Branches tracken (Keine regulären Update-Meldungen):**
+  Wenn du *gar keinen* `ref` angibst oder einen Branch-Namen wie `ref: main`, `master` oder `dev` verwendest, geht die Integration davon aus, dass du immer automatisch auf dem neuesten Stand bist (da ESPHome bei jedem Kompilieren ohnehin den aktuellsten Code vom Branch zieht). Die Integration wird in diesem Fall **keine** Tags überprüfen und dir **kein** ausstehendes Update im Dashboard anzeigen. Sie synchronisiert sich lediglich unsichtbar mit dem neuesten Commit des Branches.
+
 ### 💡 Detaillierte Beispiele
 
 Hier siehst du, wie `packages` und `external_components` üblicherweise eingebunden werden, damit Insane Updater sie erkennt:
