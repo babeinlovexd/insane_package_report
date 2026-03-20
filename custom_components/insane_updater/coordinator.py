@@ -56,16 +56,22 @@ class GitHubPackageCoordinator(DataUpdateCoordinator):
             if self.ref:
                 # We have a specific ref (could be a branch, tag, or commit).
                 # The user wants to know if there is a NEWER tag than the current ref.
-                # Actually, the instructions say:
-                # "Wenn ein ref angegeben ist, frage die /tags API ab, um den allerneuesten Tag zu finden!
-                # Wenn kein ref, finde den default_branch und hole dessen Commit."
+                # But wait, if self.ref is "main" or "master", and the repo HAS tags,
+                # we don't want to show a tag as an update for a branch track!
+                # Let's check if the ref is a known branch name.
+                is_branch = self.ref in ["main", "master", "dev", "develop"]
 
                 tags_url = f"{api_url_base}/tags"
                 async with self.session.get(tags_url, headers=headers) as resp:
                     resp.raise_for_status()
                     tags = await resp.json()
 
-                    if tags and len(tags) > 0:
+                    # If the ref is just a branch name, or there are no tags,
+                    # we should track the branch commit, not the latest tag.
+                    # Or if they provided a commit hash, it might not be a tag.
+                    # But the simplest is: if they explicitly track main/master, they don't want tags.
+
+                    if tags and len(tags) > 0 and not is_branch:
                         latest_tag = tags[0]
                         return {
                             "latest_version": latest_tag["name"],
@@ -73,7 +79,7 @@ class GitHubPackageCoordinator(DataUpdateCoordinator):
                             "release_url": f"https://github.com/{owner}/{repo}/releases/tag/{latest_tag['name']}"
                         }
                     else:
-                        # Fallback if no tags but ref is provided, just get the ref commit
+                        # Fallback if no tags but ref is provided, or ref is a branch, just get the ref commit
                         ref_url = f"{api_url_base}/commits/{self.ref}"
                         async with self.session.get(ref_url, headers=headers) as ref_resp:
                             ref_resp.raise_for_status()
