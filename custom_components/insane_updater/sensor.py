@@ -39,7 +39,6 @@ class InsaneUpdaterProtocolSensor(SensorEntity):
         self._entry_id = entry_id
         self._attr_unique_id = f"insane_updater_protocol_{entry_id}"
 
-        # Keep track of the last 50 events
         self._log_entries: list[str] = []
         self._attr_native_value = "Waiting for events..."
 
@@ -69,7 +68,6 @@ class InsaneUpdaterProtocolSensor(SensorEntity):
             url = data.get("url", "unknown_url")
             device_id = data.get("device_id", "unknown_device")
 
-            # Try to get the friendly name of the device
             device_name = "Unknown ESP"
             if device_id != "unknown_device":
                 registry = dr.async_get(self.hass)
@@ -80,17 +78,14 @@ class InsaneUpdaterProtocolSensor(SensorEntity):
             timestamp = dt_util.now().strftime("%Y-%m-%d %H:%M:%S")
             log_line = f"[{timestamp}] {device_name} reported: {url}"
 
-            # Update state to the latest event
             self._attr_native_value = f"{device_name} -> {url.split('/')[-1]}"
 
-            # Add to log list, keeping only the last 50
             self._log_entries.insert(0, log_line)
             if len(self._log_entries) > 50:
                 self._log_entries.pop()
 
             self.async_write_ha_state()
 
-        # Listen to the same event the main integration listens to
         self.async_on_remove(
             self.hass.bus.async_listen(EVENT_INSANE_PACKAGE_REPORT, async_handle_event)
         )

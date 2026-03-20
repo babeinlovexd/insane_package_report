@@ -26,5 +26,5 @@ class InsanePackageReport : public Component, public api::CustomAPIDevice {
   bool api_connected_{false};
 };
 
-}  // namespace insane_package_report
-}  // namespace esphome
+}
+}
