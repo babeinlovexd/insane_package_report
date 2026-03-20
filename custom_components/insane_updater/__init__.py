@@ -49,23 +49,29 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         # Event data: {"url": "...", "ref": "...", "type": "..."}
 
         data = event.data
+        _LOGGER.debug("Insane Updater received event: %s with data: %s", event.event_type, data)
+
         url = data.get("url")
         ref = data.get("ref", "")
         pkg_type = data.get("type", "packages")
         device_id = data.get("device_id")
 
-        if not url or not device_id:
-            _LOGGER.warning("Received invalid esphome.insane_package_report event: %s", data)
+        if not url:
+            _LOGGER.error("Insane Updater failed to process event: Missing 'url' in event data: %s", data)
+            return
+
+        if not device_id:
+            _LOGGER.error("Insane Updater failed to process event: Missing 'device_id' in event data. The ESPHome device must be properly linked in Home Assistant. Event data: %s", data)
             return
 
         registry = dr.async_get(hass)
         device = registry.async_get(device_id)
 
         if not device:
-            _LOGGER.warning("Device ID %s not found in registry", device_id)
+            _LOGGER.error("Insane Updater: Device ID '%s' not found in Home Assistant Device Registry. Cannot attach entity for URL: %s", device_id, url)
             return
 
-        _LOGGER.debug("Received package report for %s: %s @ %s", device.name, url, ref)
+        _LOGGER.info("Insane Updater successfully parsed package report for %s (ID: %s): %s @ %s", device.name, device_id, url, ref)
 
         # Notify the platform to create/update an entity
         async_dispatcher_send(
