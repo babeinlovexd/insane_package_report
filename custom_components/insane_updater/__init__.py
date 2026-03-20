@@ -73,6 +73,11 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
         _LOGGER.info("Insane Updater successfully parsed package report for %s (ID: %s): %s @ %s", device.name, device_id, url, ref)
 
+        # Wir müssen erkennen, wann der ESPHome-Code neu kompiliert wurde,
+        # damit wir die "installed_version" mit "latest_version" (Commits) synchronisieren können.
+        # Dafür nutzen wir die Firmware-Version (Kompilierungszeitpunkt), die ESPHome im Device-Registry speichert.
+        sw_version = device.sw_version or "unknown_compile_time"
+
         # Notify the platform to create/update an entity
         async_dispatcher_send(
             hass,
@@ -82,6 +87,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             url,
             ref,
             pkg_type,
+            sw_version,
         )
 
     unsub = hass.bus.async_listen(EVENT_INSANE_PACKAGE_REPORT, handle_package_report)

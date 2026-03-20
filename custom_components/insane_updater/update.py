@@ -29,7 +29,7 @@ async def async_setup_entry(
     """Set up the Update platform for Insane Updater."""
 
     @callback
-    def async_add_package_entity(entry_id, device_id, url, ref, pkg_type):
+    def async_add_package_entity(entry_id, device_id, url, ref, pkg_type, sw_version):
         """Add a new package entity if it doesn't exist."""
         if entry.entry_id != entry_id:
             return
@@ -45,7 +45,7 @@ async def async_setup_entry(
             # Entity already exists, just update installed version if needed
             if coordinators[entity_id] is not None:
                 entity = coordinators[entity_id]["entity"]
-                entity.async_update_installed_version(ref)
+                entity.async_update_device_sw_version(sw_version)
             return
 
         # Mark as being processed to prevent duplicate creation
@@ -57,7 +57,7 @@ async def async_setup_entry(
 
         # FIX: Sofort registrieren, niemals auf GitHub warten!
         entity = InsanePackageUpdateEntity(
-            coordinator, device_id, url, ref, pkg_type, store, stored_data
+            coordinator, device_id, url, ref, pkg_type, store, stored_data, sw_version
         )
 
         coordinators[entity_id] = {"coordinator": coordinator, "entity": entity}
@@ -92,6 +92,7 @@ class InsanePackageUpdateEntity(CoordinatorEntity[GitHubPackageCoordinator], Upd
         pkg_type: str,
         store: Store,
         stored_data: dict,
+        sw_version: str,
     ) -> None:
         """Initialize the entity."""
         super().__init__(coordinator)
@@ -101,12 +102,28 @@ class InsanePackageUpdateEntity(CoordinatorEntity[GitHubPackageCoordinator], Upd
         self._pkg_type = pkg_type
         self._store = store
         self._stored_data = stored_data
+        self._sw_version = sw_version
 
-        # Load installed version from store
-        store_key = f"{self._device_id}_{self._url}"
-        if store_key in self._stored_data:
-            self._installed_version = self._stored_data[store_key]
-        else:
+        # Load installed version and previous sw_version from store
+        self._store_key = f"{self._device_id}_{self._url}"
+        self._sw_store_key = f"sw_{self._device_id}"
+
+        self._installed_version = self._stored_data.get(self._store_key)
+
+        # If we just booted, we check if the ESPHome compilation time (sw_version) changed.
+        # If it changed, we assume the user flashed the device with the newest code.
+        previous_sw_version = self._stored_data.get(self._sw_store_key)
+
+        if previous_sw_version != self._sw_version:
+            # The user re-compiled and flashed the ESP! Clear the installed version
+            # so it syncs up with whatever GitHub's latest version is on the first fetch.
+            self._installed_version = None
+
+            # Save the new firmware version
+            self._stored_data[self._sw_store_key] = self._sw_version
+            self.hass.async_create_task(self._store.async_save(self._stored_data))
+
+        if not self._installed_version:
             self._installed_version = self._ref if self._ref else "main"
 
         # Generate unique ID based on device and URL
@@ -144,13 +161,18 @@ class InsanePackageUpdateEntity(CoordinatorEntity[GitHubPackageCoordinator], Upd
     @property
     def installed_version(self) -> str | None:
         """Version installed and in use."""
-        # If no explicit version/ref was tracked and it's just defaulting to "main",
-        # but the actual latest branch/version from GitHub is different, we align them
-        # so it doesn't falsely report an update available forever.
-        if self._ref in ["main", "master", "dev", "develop", ""] and self.coordinator.data:
-            latest = self.coordinator.data.get("latest_version")
-            if latest and self._installed_version in ["main", "master", "dev", "develop", ""]:
-                return latest
+        # Check if we should automatically sync the installed version on first fetch
+        # (e.g., because the ESP was just flashed, or we're tracking a branch without a commit hash yet).
+        if self.coordinator.data:
+            is_branch = self._ref in ["main", "master", "dev", "develop", ""]
+            latest_version = self.coordinator.data.get("latest_version")
+
+            # If we're tracking a branch, we expect latest_version to be "branch (commit_hash)"
+            if is_branch and latest_version and self._installed_version in ["main", "master", "dev", "develop", ""]:
+                # The ESP was tracking a raw branch string, update it to the specific commit hash
+                self._installed_version = latest_version
+                self._stored_data[self._store_key] = self._installed_version
+                self.hass.async_create_task(self._store.async_save(self._stored_data))
 
         return self._installed_version
 
@@ -169,11 +191,22 @@ class InsanePackageUpdateEntity(CoordinatorEntity[GitHubPackageCoordinator], Upd
         return None
 
     @callback
-    def async_update_installed_version(self, new_ref: str) -> None:
-        """Update the installed version and save to store."""
-        if self._installed_version != new_ref:
-            self._installed_version = new_ref
-            store_key = f"{self._device_id}_{self._url}"
-            self._stored_data[store_key] = new_ref
+    def async_update_device_sw_version(self, new_sw_version: str) -> None:
+        """Update the firmware version to detect reflashes."""
+        if self._sw_version != new_sw_version:
+            self._sw_version = new_sw_version
+            self._stored_data[self._sw_store_key] = new_sw_version
+
+            # If the device was reflashed, we assume it pulled the latest Github code
+            # We clear the installed version so it re-syncs seamlessly.
+            self._installed_version = None
+            if self.coordinator.data:
+                self._installed_version = self.coordinator.data.get("latest_version", self._ref)
+
+            if not self._installed_version:
+                self._installed_version = self._ref if self._ref else "main"
+
+            self._stored_data[self._store_key] = self._installed_version
+
             self.hass.async_create_task(self._store.async_save(self._stored_data))
             self.async_write_ha_state()
