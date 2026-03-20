@@ -12,7 +12,7 @@ from homeassistant.helpers.storage import Store
 from .const import DOMAIN, CONF_GITHUB_TOKEN, CONF_UPDATE_INTERVAL, DEFAULT_UPDATE_INTERVAL, EVENT_INSANE_PACKAGE_REPORT, SIGNAL_NEW_PACKAGE, STORAGE_KEY, STORAGE_VERSION
 
 _LOGGER = logging.getLogger(__name__)
-PLATFORMS: list[Platform] = [Platform.UPDATE]
+PLATFORMS: list[Platform] = [Platform.UPDATE, Platform.SENSOR]
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:

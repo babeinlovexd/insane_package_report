@@ -148,7 +148,7 @@ class InsanePackageUpdateEntity(CoordinatorEntity[GitHubPackageCoordinator], Upd
     def latest_version(self) -> str | None:
         """Latest version available for install."""
         if self.coordinator.data:
-            return self.coordinator.data.get("latest_version")
+            return self.coordinator.data.get("latest_version") # <-- FIX: Nicht latest_commit!
         return None
 
     @property
