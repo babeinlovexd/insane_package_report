@@ -61,9 +61,6 @@ async def to_code(config):
     var = cg.new_Pvariable(config[CONF_ID])
     await cg.register_component(var, config)
 
-    # We use this define to use custom API service functions
-    cg.add_define("USE_API_HOMEASSISTANT_SERVICES")
-
     repos = []
 
     if hasattr(CORE, "raw_config"):
