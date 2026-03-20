@@ -112,7 +112,7 @@ class InsanePackageUpdateEntity(CoordinatorEntity[GitHubPackageCoordinator], Upd
             self._installed_version = None
 
             self._stored_data[self._sw_store_key] = self._sw_version
-            self.hass.async_create_task(self._store.async_save(self._stored_data))
+            self.coordinator.hass.async_create_task(self._store.async_save(self._stored_data))
 
         if not self._installed_version:
             self._installed_version = self._ref if self._ref else "main"
