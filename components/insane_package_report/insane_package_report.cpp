@@ -1,3 +1,5 @@
+// https://github.com/babeinlovexd
+
 #include "insane_package_report.h"
 #include "esphome/core/log.h"
 #include "esphome/components/api/api_server.h"

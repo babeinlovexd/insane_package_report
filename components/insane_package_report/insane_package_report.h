@@ -1,3 +1,5 @@
+// https://github.com/babeinlovexd
+
 #pragma once
 
 #include "esphome/core/component.h"
