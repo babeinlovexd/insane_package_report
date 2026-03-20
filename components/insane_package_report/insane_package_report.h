@@ -26,6 +26,7 @@ class InsanePackageReport : public Component, public api::CustomAPIDevice {
  protected:
   std::vector<Repository> repositories_;
   bool api_connected_{false};
+  std::vector<std::string> timeout_names_;
 };
 
 }
