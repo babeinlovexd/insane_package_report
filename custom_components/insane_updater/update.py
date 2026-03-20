@@ -130,9 +130,11 @@ class InsanePackageUpdateEntity(CoordinatorEntity[GitHubPackageCoordinator], Upd
         # can break the original integration's connection.
         if device:
             # We must return a list of tuples or set of tuples for identifiers
-            return {
-                "identifiers": device.identifiers,
-            }
+            # If the device has no identifiers, fallback to connections to avoid the "Invalid device info {'identifiers': set()}" crash
+            if device.identifiers:
+                return {"identifiers": device.identifiers}
+            elif getattr(device, "connections", None):
+                return {"connections": device.connections}
 
         # Fallback if device somehow not found, though we checked in __init__.py
         return {
