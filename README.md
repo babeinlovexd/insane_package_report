@@ -1,5 +1,7 @@
 # Insane Updater
 
+*[Read this in English](#insane-updater-english)*
+
 **Insane Updater** ist ein zweiteiliges Projekt, das dir in Home Assistant mitteilt, wenn es Updates für die in deinen ESPHome-Geräten verwendeten `packages` und `external_components` gibt. Das System greift während der Kompilierung eines ESPs die verwendeten GitHub-Repositories ab und übermittelt diese asynchron an Home Assistant. Dort wird eine dynamische Update-Entität für jedes Repository und Gerät erstellt.
 
 ---
