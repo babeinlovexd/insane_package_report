@@ -38,13 +38,20 @@ void InsanePackageReport::on_client_connected_() {
   uint32_t delay_ms = 5000;
   int index = 0;
 
+  // Clear old timeout names if any to prevent unbounded growth,
+  // though typically this is only called once per connection.
+  this->timeout_names_.clear();
+  this->timeout_names_.reserve(this->repositories_.size());
+
   for (const auto &repo : this->repositories_) {
     std::string url_copy = repo.url;
     std::string ref_copy = repo.ref;
     std::string type_copy = repo.type;
-    std::string timeout_name = "insane_report_" + std::to_string(index++);
 
-    this->set_timeout(timeout_name, delay_ms, [this, url_copy, ref_copy, type_copy]() {
+    this->timeout_names_.push_back("insane_report_" + std::to_string(index++));
+    const char *timeout_name_ptr = this->timeout_names_.back().c_str();
+
+    this->set_timeout(timeout_name_ptr, delay_ms, [this, url_copy, ref_copy, type_copy]() {
       if (api::global_api_server != nullptr && api::global_api_server->is_connected()) {
         ESP_LOGD(TAG, "Sending HA event: esphome.insane_package_report for %s", url_copy.c_str());
 
