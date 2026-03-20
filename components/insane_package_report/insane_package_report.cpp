@@ -40,6 +40,9 @@ void InsanePackageReport::on_client_connected_() {
 
   // Clear old timeout names if any to prevent unbounded growth,
   // though typically this is only called once per connection.
+  for (const auto &name : this->timeout_names_) {
+    this->cancel_timeout(name);
+  }
   this->timeout_names_.clear();
   this->timeout_names_.reserve(this->repositories_.size());
 
