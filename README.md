@@ -69,11 +69,15 @@ external_components:
 
 ## ⚙️ Konfiguration (ESPHome)
 
-Damit dein ESPHome-Gerät seine genutzten Packages melden kann, musst du die Komponente in der YAML des jeweiligen Geräts aktivieren.
+Damit dein ESPHome-Gerät seine genutzten Packages melden kann, musst du die Komponente in der YAML des jeweiligen Geräts aktivieren. Außerdem benötigt die Komponente die Erlaubnis, Home Assistant Events auszulösen. Hierfür muss `homeassistant_services: true` in deiner `api:` Konfiguration aktiviert sein.
 
 **Achtung:** Dies ist ein Dummy-Eintrag. Du musst einfach nur `insane_package_report:` ins Root-Level deiner YAML schreiben.
 
 ```yaml
+api:
+  # Erforderlich, damit ESPHome Events an Home Assistant senden kann!
+  homeassistant_services: true
+
 # Aktiviert den Insane Package Report (Zwingend erforderlich!)
 insane_package_report:
 ```
@@ -84,6 +88,9 @@ Hier siehst du, wie `packages` und `external_components` üblicherweise eingebun
 
 #### Beispiel 1: Einfaches Package von GitHub mit Versions-Tag
 ```yaml
+api:
+  homeassistant_services: true
+
 insane_package_report:
 
 packages:
@@ -99,6 +106,9 @@ packages:
 
 #### Beispiel 2: External Component von GitHub
 ```yaml
+api:
+  homeassistant_services: true
+
 insane_package_report:
 
 external_components:
@@ -114,6 +124,9 @@ external_components:
 
 #### Beispiel 3: Kombination von beidem
 ```yaml
+api:
+  homeassistant_services: true
+
 insane_package_report:
 
 packages:
