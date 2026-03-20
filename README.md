@@ -82,14 +82,15 @@ api:
 insane_package_report:
 ```
 
-### 📌 Tags vs. Branches (WICHTIG für Update-Benachrichtigungen!)
+### 📌 Tags vs. Branches (Intelligente Updates!)
 
-Damit die Integration dir **korrekt mitteilt, ob ein Update verfügbar ist**, musst du verstehen, wie Insane Updater die `ref` Eigenschaft in deiner ESPHome YAML interpretiert:
+Die Integration ist extrem smart und erkennt Updates völlig automatisch, egal ob du feste Versionen oder laufende Branches verwendest:
 
-- **Tags tracken (Updates werden gemeldet):**
-  Wenn du eine feste Version wie `ref: v1.0.0` angibst, schaut die Integration auf GitHub nach, ob ein neuerer Release-Tag existiert (z.B. `v1.0.1`). Ist das der Fall, erscheint in Home Assistant die Meldung "Update verfügbar". **Das ist der empfohlene Weg!**
-- **Branches tracken (Keine regulären Update-Meldungen):**
-  Wenn du *gar keinen* `ref` angibst oder einen Branch-Namen wie `ref: main`, `master` oder `dev` verwendest, geht die Integration davon aus, dass du immer automatisch auf dem neuesten Stand bist (da ESPHome bei jedem Kompilieren ohnehin den aktuellsten Code vom Branch zieht). Die Integration wird in diesem Fall **keine** Tags überprüfen und dir **kein** ausstehendes Update im Dashboard anzeigen. Sie synchronisiert sich lediglich unsichtbar mit dem neuesten Commit des Branches.
+- **Tags tracken (Release Updates):**
+  Wenn du eine feste Version wie `ref: v1.0.0` angibst, schaut die Integration auf GitHub nach, ob ein neuerer Release-Tag existiert (z.B. `v1.0.1`). Ist das der Fall, erscheint in Home Assistant die Meldung "Update verfügbar".
+- **Branches tracken (Commit Updates):**
+  Wenn du *gar keinen* `ref` angibst oder einen Branch-Namen wie `ref: main` verwendest, merkt sich die Integration exakt, welchen Commit du dir beim Flashen deines ESPs auf GitHub heruntergeladen hast (z.B. `main (a1b2c3d)`). Sobald der Autor des Repositories einen neuen Code-Commit hochlädt, wird dir in Home Assistant sofort "Update verfügbar" angezeigt!
+  Sobald du in ESPHome auf "Install" (oder "Clean Build") klickst und den ESP neu flasht, erkennt die Integration anhand des ESPHome-Kompilierungsdatums, dass du neu geflasht hast. Das "Update verfügbar"-Schild verschwindet automatisch und der ESP gilt wieder als aktuell!
 
 ### 💡 Detaillierte Beispiele
 

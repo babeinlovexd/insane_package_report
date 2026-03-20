@@ -84,8 +84,13 @@ class GitHubPackageCoordinator(DataUpdateCoordinator):
                         async with self.session.get(ref_url, headers=headers) as ref_resp:
                             ref_resp.raise_for_status()
                             commit_data = await ref_resp.json()
+
+                            # For branches, we want to display the branch name AND the commit hash snippet
+                            # so users can see when the branch updates.
+                            version_str = f"{self.ref} ({commit_data['sha'][:7]})" if is_branch else self.ref
+
                             return {
-                                "latest_version": self.ref,
+                                "latest_version": version_str,
                                 "latest_commit": commit_data["sha"],
                                 "release_url": f"https://github.com/{owner}/{repo}/commits/{self.ref}"
                             }
@@ -102,8 +107,10 @@ class GitHubPackageCoordinator(DataUpdateCoordinator):
                     resp.raise_for_status()
                     commit_data = await resp.json()
 
+                    version_str = f"{default_branch} ({commit_data['sha'][:7]})"
+
                     return {
-                        "latest_version": default_branch,
+                        "latest_version": version_str,
                         "latest_commit": commit_data["sha"],
                         "release_url": f"https://github.com/{owner}/{repo}/commits/{default_branch}"
                     }
