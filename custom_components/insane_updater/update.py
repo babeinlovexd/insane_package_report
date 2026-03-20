@@ -55,20 +55,18 @@ async def async_setup_entry(
             hass, domain_data["token"], url, ref, pkg_type, domain_data["update_interval"]
         )
 
-        async def fetch_and_add():
-            try:
-                await coordinator.async_config_entry_first_refresh()
-            except Exception as ex:
-                _LOGGER.warning("First refresh failed for %s, adding entity anyway: %s", url, ex)
+        # FIX: Sofort registrieren, niemals auf GitHub warten!
+        entity = InsanePackageUpdateEntity(
+            coordinator, device_id, url, ref, pkg_type, store, stored_data
+        )
 
-            entity = InsanePackageUpdateEntity(
-                coordinator, device_id, url, ref, pkg_type, store, stored_data
-            )
+        coordinators[entity_id] = {"coordinator": coordinator, "entity": entity}
 
-            coordinators[entity_id] = {"coordinator": coordinator, "entity": entity}
-            async_add_entities([entity])
+        # 1. Sofort an HA übergeben
+        async_add_entities([entity])
 
-        hass.async_create_task(fetch_and_add())
+        # 2. Asynchron laden lassen
+        hass.async_create_task(coordinator.async_request_refresh())
 
     entry.async_on_unload(
         async_dispatcher_connect(
