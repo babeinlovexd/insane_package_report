@@ -1,3 +1,5 @@
+# https://github.com/babeinlovexd
+
 from datetime import timedelta
 
 DOMAIN = "insane_updater"
