@@ -33,8 +33,7 @@ void InsanePackageReport::add_repository(const std::string &url, const std::stri
 void InsanePackageReport::on_client_connected_() {
   ESP_LOGD(TAG, "API Client connected. Sending %zu package reports.", this->repositories_.size());
 
-  // We send one event per repository with a delay to not overwhelm the connection and avoid the 255 char limit
-  uint32_t delay_ms = 5000; // Start with 5 seconds delay to allow HA to finish setting up
+  uint32_t delay_ms = 5000;
   int index = 0;
 
   for (const auto &repo : this->repositories_) {
@@ -55,9 +54,9 @@ void InsanePackageReport::on_client_connected_() {
       }
     });
 
-    delay_ms += 2000; // 2 seconds between each event
+    delay_ms += 2000;
   }
 }
 
-}  // namespace insane_package_report
-}  // namespace esphome
+}
+}

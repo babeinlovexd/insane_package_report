@@ -31,8 +31,6 @@ class GitHubPackageCoordinator(DataUpdateCoordinator):
     async def _async_update_data(self) -> dict[str, Any]:
         """Fetch latest version from GitHub."""
 
-        # Parse github url to get owner/repo
-        # https://github.com/owner/repo
         parts = self.url.rstrip('/').split('/')
         if len(parts) < 2:
             raise UpdateFailed(f"Invalid GitHub URL: {self.url}")
@@ -54,22 +52,12 @@ class GitHubPackageCoordinator(DataUpdateCoordinator):
 
         try:
             if self.ref:
-                # We have a specific ref (could be a branch, tag, or commit).
-                # The user wants to know if there is a NEWER tag than the current ref.
-                # But wait, if self.ref is "main" or "master", and the repo HAS tags,
-                # we don't want to show a tag as an update for a branch track!
-                # Let's check if the ref is a known branch name.
                 is_branch = self.ref in ["main", "master", "dev", "develop"]
 
                 tags_url = f"{api_url_base}/tags"
                 async with self.session.get(tags_url, headers=headers) as resp:
                     resp.raise_for_status()
                     tags = await resp.json()
-
-                    # If the ref is just a branch name, or there are no tags,
-                    # we should track the branch commit, not the latest tag.
-                    # Or if they provided a commit hash, it might not be a tag.
-                    # But the simplest is: if they explicitly track main/master, they don't want tags.
 
                     if tags and len(tags) > 0 and not is_branch:
                         latest_tag = tags[0]
@@ -79,14 +67,11 @@ class GitHubPackageCoordinator(DataUpdateCoordinator):
                             "release_url": f"https://github.com/{owner}/{repo}/releases/tag/{latest_tag['name']}"
                         }
                     else:
-                        # Fallback if no tags but ref is provided, or ref is a branch, just get the ref commit
                         ref_url = f"{api_url_base}/commits/{self.ref}"
                         async with self.session.get(ref_url, headers=headers) as ref_resp:
                             ref_resp.raise_for_status()
                             commit_data = await ref_resp.json()
 
-                            # For branches, we want to display the branch name AND the commit hash snippet
-                            # so users can see when the branch updates.
                             version_str = f"{self.ref} ({commit_data['sha'][:7]})" if is_branch else self.ref
 
                             return {
@@ -96,7 +81,6 @@ class GitHubPackageCoordinator(DataUpdateCoordinator):
                             }
 
             else:
-                # No ref provided. Find default branch, then get latest commit.
                 async with self.session.get(api_url_base, headers=headers) as resp:
                     resp.raise_for_status()
                     repo_info = await resp.json()

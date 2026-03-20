@@ -33,7 +33,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         "update_interval": update_interval,
         "store": store,
         "stored_data": stored_data,
-        "coordinators": {}, # By (device_id, url)
+        "coordinators": {},
     }
 
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
@@ -42,11 +42,6 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
     async def handle_package_report(event: Event) -> None:
         """Handle esphome.insane_package_report event."""
-
-        # Event structure is:
-        # device_id (usually added by esphome event mechanism if mapped to device,
-        # but esphome events contain it in device_id or we need to find the device)
-        # Event data: {"url": "...", "ref": "...", "type": "..."}
 
         data = event.data
         _LOGGER.debug("Insane Updater received event: %s with data: %s", event.event_type, data)
@@ -73,12 +68,8 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
         _LOGGER.info("Insane Updater successfully parsed package report for %s (ID: %s): %s @ %s", device.name, device_id, url, ref)
 
-        # Wir müssen erkennen, wann der ESPHome-Code neu kompiliert wurde,
-        # damit wir die "installed_version" mit "latest_version" (Commits) synchronisieren können.
-        # Dafür nutzen wir die Firmware-Version (Kompilierungszeitpunkt), die ESPHome im Device-Registry speichert.
         sw_version = device.sw_version or "unknown_compile_time"
 
-        # Notify the platform to create/update an entity
         async_dispatcher_send(
             hass,
             SIGNAL_NEW_PACKAGE,
