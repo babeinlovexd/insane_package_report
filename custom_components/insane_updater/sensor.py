@@ -75,7 +75,7 @@ class InsaneUpdaterProtocolSensor(SensorEntity):
                 registry = dr.async_get(self.hass)
                 device = registry.async_get(device_id)
                 if device:
-                    device_name = device.name or device_name
+                    device_name = device.name_by_user or device.name or device_name
 
             timestamp = dt_util.now().strftime("%Y-%m-%d %H:%M:%S")
             log_line = f"[{timestamp}] {device_name} reported: {url}"

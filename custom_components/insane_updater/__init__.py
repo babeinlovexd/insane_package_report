@@ -68,7 +68,9 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             _LOGGER.error("Insane Updater: Device ID '%s' not found in Home Assistant Device Registry. Cannot attach entity for URL: %s", device_id, url)
             return
 
-        _LOGGER.info("Insane Updater successfully parsed package report for %s (ID: %s): %s @ %s", device.name, device_id, url, ref)
+        device_name = device.name_by_user or device.name or "Unknown ESP"
+
+        _LOGGER.info("Insane Updater successfully parsed package report for %s (ID: %s): %s @ %s", device_name, device_id, url, ref)
 
         sw_version = device.sw_version or "unknown_compile_time"
 
