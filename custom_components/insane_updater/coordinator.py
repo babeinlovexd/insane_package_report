@@ -56,31 +56,33 @@ class GitHubPackageCoordinator(DataUpdateCoordinator):
             if self.ref:
                 is_branch = self.ref in ["main", "master", "dev", "develop"]
 
-                tags_url = f"{api_url_base}/tags"
-                async with self.session.get(tags_url, headers=headers) as resp:
-                    resp.raise_for_status()
-                    tags = await resp.json()
+                if not is_branch:
+                    tags_url = f"{api_url_base}/tags"
+                    async with self.session.get(tags_url, headers=headers) as resp:
+                        resp.raise_for_status()
+                        tags = await resp.json()
 
-                    if tags and len(tags) > 0 and not is_branch:
-                        latest_tag = tags[0]
-                        return {
-                            "latest_version": latest_tag["name"],
-                            "latest_commit": latest_tag["commit"]["sha"],
-                            "release_url": f"https://github.com/{owner}/{repo}/releases/tag/{latest_tag['name']}"
-                        }
-                    else:
-                        ref_url = f"{api_url_base}/commits/{self.ref}"
-                        async with self.session.get(ref_url, headers=headers) as ref_resp:
-                            ref_resp.raise_for_status()
-                            commit_data = await ref_resp.json()
-
-                            version_str = f"{self.ref} ({commit_data['sha'][:7]})" if is_branch else self.ref
-
+                        if tags and len(tags) > 0:
+                            latest_tag = tags[0]
                             return {
-                                "latest_version": version_str,
-                                "latest_commit": commit_data["sha"],
-                                "release_url": f"https://github.com/{owner}/{repo}/commits/{self.ref}"
+                                "latest_version": latest_tag["name"],
+                                "latest_commit": latest_tag["commit"]["sha"],
+                                "release_url": f"https://github.com/{owner}/{repo}/releases/tag/{latest_tag['name']}"
                             }
+
+                # Fallback to commits if it is a branch or no tags were found
+                ref_url = f"{api_url_base}/commits/{self.ref}"
+                async with self.session.get(ref_url, headers=headers) as ref_resp:
+                    ref_resp.raise_for_status()
+                    commit_data = await ref_resp.json()
+
+                    version_str = f"{self.ref} ({commit_data['sha'][:7]})" if is_branch else self.ref
+
+                    return {
+                        "latest_version": version_str,
+                        "latest_commit": commit_data["sha"],
+                        "release_url": f"https://github.com/{owner}/{repo}/commits/{self.ref}"
+                    }
 
             else:
                 async with self.session.get(api_url_base, headers=headers) as resp:
