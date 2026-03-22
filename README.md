@@ -71,14 +71,28 @@ external_components:
 
 ## ⚙️ Konfiguration (ESPHome)
 
-Damit dein ESPHome-Gerät seine genutzten Packages melden kann, musst du die Komponente in der YAML des jeweiligen Geräts aktivieren.
+Damit dein ESPHome-Gerät seine genutzten Packages melden kann, musst du die Komponente in der YAML des jeweiligen Geräts aktivieren. Zusätzlich muss die Komponente die Erlaubnis haben, Home Assistant Events abzufeuern. Hierfür muss unter `api:` der Punkt `homeassistant_services: true` aktiviert werden.
 
 **Achtung:** Dies ist ein Dummy-Eintrag. Du musst einfach nur `insane_package_report:` ins Root-Level deiner YAML schreiben.
 
 ```yaml
+api:
+  # Zwingend erforderlich, damit ESPHome Events an Home Assistant senden darf!
+  homeassistant_services: true
+
 # Aktiviert den Insane Package Report (Zwingend erforderlich!)
 insane_package_report:
 ```
+
+### 📌 Tags vs. Branches (Smarte Updates!)
+
+Die Integration ist extrem smart und erkennt Updates vollkommen automatisch, egal ob du mit festen Versionen oder rollierenden Branches arbeitest:
+
+- **Tags tracken (Release Updates):**
+  Gibst du eine feste Version wie `ref: v1.0.0` an, prüft die Integration auf GitHub, ob es einen neueren Release-Tag gibt (z.B. `v1.0.1`). Wenn ja, meldet dir Home Assistant "Update verfügbar".
+- **Branches tracken (Commit Updates):**
+  Gibst du *kein* `ref` an oder nutzt einen Branch-Namen wie `ref: main`, merkt sich die Integration exakt, welchen Commit du beim Flashen deines ESPs von GitHub heruntergeladen hast (z.B. `main (a1b2c3d)`). Sobald der Autor des Repositories neuen Code pusht, wird dir in Home Assistant sofort "Update verfügbar" angezeigt!
+  Klickst du dann in ESPHome auf "Install" (oder "Clean Build") und flasht den ESP neu, erkennt die Integration anhand des ESPHome-Kompilierungsdatums, dass du neu geflasht hast. Das "Update verfügbar" verschwindet automatisch und der ESP gilt wieder als aktuell!
 
 ### 💡 Detaillierte Beispiele
 
@@ -86,6 +100,9 @@ Hier siehst du, wie `packages` und `external_components` üblicherweise eingebun
 
 #### Beispiel 1: Einfaches Package von GitHub mit Versions-Tag
 ```yaml
+api:
+  homeassistant_services: true
+
 insane_package_report:
 
 packages:
@@ -101,6 +118,9 @@ packages:
 
 #### Beispiel 2: External Component von GitHub
 ```yaml
+api:
+  homeassistant_services: true
+
 insane_package_report:
 
 external_components:
@@ -116,6 +136,9 @@ external_components:
 
 #### Beispiel 3: Kombination von beidem
 ```yaml
+api:
+  homeassistant_services: true
+
 insane_package_report:
 
 packages:
