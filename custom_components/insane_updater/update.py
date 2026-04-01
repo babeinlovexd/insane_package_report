@@ -16,6 +16,7 @@ from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from homeassistant.helpers import device_registry as dr
 from homeassistant.helpers.storage import Store
+from homeassistant.util import slugify
 
 from .const import DOMAIN, SIGNAL_NEW_PACKAGE
 from .coordinator import GitHubPackageCoordinator
@@ -41,7 +42,7 @@ async def async_setup_entry(
         store = domain_data["store"]
         stored_data = domain_data["stored_data"]
 
-        entity_id = f"{device_id}_{url}"
+        entity_id = f"{device_id}_{slugify(url)}"
 
         if entity_id in coordinators:
             if coordinators[entity_id] is not None:
@@ -107,7 +108,7 @@ class InsanePackageUpdateEntity(CoordinatorEntity[GitHubPackageCoordinator], Upd
         self._stored_data = stored_data
         self._sw_version = sw_version
 
-        self._store_key = f"{self._device_id}_{self._url}"
+        self._store_key = f"{self._device_id}_{slugify(self._url)}"
         self._sw_store_key = f"sw_{self._device_id}"
 
         self._installed_version = self._stored_data.get(self._store_key)
@@ -127,7 +128,7 @@ class InsanePackageUpdateEntity(CoordinatorEntity[GitHubPackageCoordinator], Upd
         if repo_name.endswith(".git"):
             repo_name = repo_name[:-4]
 
-        self._attr_unique_id = f"insane_updater_{self._device_id}_{self._url}"
+        self._attr_unique_id = f"insane_updater_{self._device_id}_{slugify(self._url)}"
         self._attr_name = f"{repo_name} Update"
 
     @property
