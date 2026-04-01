@@ -19,6 +19,7 @@ from homeassistant.helpers.storage import Store
 
 from .const import DOMAIN, SIGNAL_NEW_PACKAGE
 from .coordinator import GitHubPackageCoordinator
+from .utils import parse_github_url
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -123,9 +124,10 @@ class InsanePackageUpdateEntity(CoordinatorEntity[GitHubPackageCoordinator], Upd
         if not self._installed_version:
             self._installed_version = self._ref if self._ref else "main"
 
-        repo_name = self._url.rstrip("/").split("/")[-1]
-        if repo_name.endswith(".git"):
-            repo_name = repo_name[:-4]
+        try:
+            _, repo_name = parse_github_url(self._url)
+        except ValueError:
+            repo_name = self._url.split("/")[-1]
 
         self._attr_unique_id = f"insane_updater_{self._device_id}_{self._url}"
         self._attr_name = f"{repo_name} Update"

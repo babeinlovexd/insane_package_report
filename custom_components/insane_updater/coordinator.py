@@ -10,6 +10,7 @@ from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, Upda
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 
 from .const import DOMAIN
+from .utils import parse_github_url
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -33,15 +34,10 @@ class GitHubPackageCoordinator(DataUpdateCoordinator):
     async def _async_update_data(self) -> dict[str, Any]:
         """Fetch latest version from GitHub."""
 
-        parts = self.url.rstrip('/').split('/')
-        if len(parts) < 2:
-            raise UpdateFailed(f"Invalid GitHub URL: {self.url}")
-
-        owner = parts[-2]
-        repo = parts[-1]
-
-        if repo.endswith(".git"):
-            repo = repo[:-4]
+        try:
+            owner, repo = parse_github_url(self.url)
+        except ValueError as err:
+            raise UpdateFailed(str(err)) from err
 
         headers = {
             "Accept": "application/vnd.github.v3+json",

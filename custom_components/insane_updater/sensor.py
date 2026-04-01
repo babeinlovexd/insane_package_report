@@ -14,6 +14,7 @@ from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.util import dt as dt_util
 
 from .const import DOMAIN, EVENT_INSANE_PACKAGE_REPORT
+from .utils import parse_github_url
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -80,7 +81,12 @@ class InsaneUpdaterProtocolSensor(SensorEntity):
             timestamp = dt_util.now().strftime("%Y-%m-%d %H:%M:%S")
             log_line = f"[{timestamp}] {device_name} reported: {url}"
 
-            self._attr_native_value = f"{device_name} -> {url.split('/')[-1]}"
+            try:
+                _, repo_name = parse_github_url(url)
+            except ValueError:
+                repo_name = url.split("/")[-1]
+
+            self._attr_native_value = f"{device_name} -> {repo_name}"
 
             self._log_entries.insert(0, log_line)
             if len(self._log_entries) > 50:
