@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import logging
+from collections import deque
 from datetime import datetime
 from typing import Any
 
@@ -41,7 +42,7 @@ class InsaneUpdaterProtocolSensor(SensorEntity):
         self._entry_id = entry_id
         self._attr_unique_id = f"insane_updater_protocol_{entry_id}"
 
-        self._log_entries: list[str] = []
+        self._log_entries: deque[str] = deque(maxlen=50)
         self._attr_native_value = "Waiting for events..."
 
     @property
@@ -82,9 +83,7 @@ class InsaneUpdaterProtocolSensor(SensorEntity):
 
             self._attr_native_value = f"{device_name} -> {url.split('/')[-1]}"
 
-            self._log_entries.insert(0, log_line)
-            if len(self._log_entries) > 50:
-                self._log_entries.pop()
+            self._log_entries.appendleft(log_line)
 
             self.async_write_ha_state()
 
