@@ -49,7 +49,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         _LOGGER.debug("Insane Updater received event: %s with data: %s", event.event_type, data)
 
         url = data.get("url")
-        ref = data.get("ref", "")
+        ref = data.get("ref", "").strip()
         pkg_type = data.get("type", "packages")
         device_id = data.get("device_id")
 

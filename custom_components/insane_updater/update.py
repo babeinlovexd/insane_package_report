@@ -48,13 +48,14 @@ async def async_setup_entry(
         if entity_id in coordinators:
             if coordinators[entity_id] is not None:
                 entity = coordinators[entity_id]["entity"]
-                entity.async_update_device_sw_version(sw_version)
 
                 # Update ref if changed in the event (e.g. user changed ref in YAML and recompiled)
                 if entity._ref != ref:
                     entity._ref = ref
                     coordinators[entity_id]["coordinator"].ref = ref
                     hass.async_create_task(coordinators[entity_id]["coordinator"].async_request_refresh())
+
+                entity.async_update_device_sw_version(sw_version)
             return
 
         coordinators[entity_id] = None
@@ -186,8 +187,8 @@ class InsanePackageUpdateEntity(CoordinatorEntity[GitHubPackageCoordinator], Upd
 
             is_branch = self._ref in ["main", "master", "dev", "develop", ""]
 
-            if is_branch and self.coordinator.data:
-                self._installed_version = self.coordinator.data.get("latest_version", self._ref)
+            if is_branch:
+                self._installed_version = self._ref if self._ref else "main"
             else:
                 self._installed_version = self._ref
 
