@@ -1,6 +1,5 @@
 
 import sys
-import asyncio
 from unittest.mock import MagicMock, patch, AsyncMock
 
 # Mock Home Assistant modules before they are imported
