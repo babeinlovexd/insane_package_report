@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import re
 from typing import Any
 
 import voluptuous as vol
@@ -21,9 +22,28 @@ UPDATE_INTERVAL_OPTIONS = [
     selector.SelectOptionDict(value="24", label="24h"),
 ]
 
+
+def validate_github_token(value: str) -> str:
+    """Validate GitHub token format."""
+    if not value:
+        return value
+    if re.match(r"^ghp_[a-zA-Z0-9]{36}$", value):
+        return value
+    if re.match(r"^github_pat_[a-zA-Z0-9]{22}_[a-zA-Z0-9]{59}$", value):
+        return value
+    raise vol.Invalid(
+        "Invalid GitHub token format. Should be a Classic PAT (ghp_...) or Fine-grained PAT (github_pat_...)"
+    )
+
+
 STEP_USER_DATA_SCHEMA = vol.Schema(
     {
-        vol.Optional(CONF_GITHUB_TOKEN, default=""): str,
+        vol.Optional(CONF_GITHUB_TOKEN, default=""): vol.All(
+            selector.TextSelector(
+                selector.TextSelectorConfig(type=selector.TextSelectorType.PASSWORD)
+            ),
+            validate_github_token,
+        ),
         vol.Optional(CONF_UPDATE_INTERVAL, default=str(DEFAULT_UPDATE_INTERVAL)): selector.SelectSelector(
             selector.SelectSelectorConfig(
                 options=UPDATE_INTERVAL_OPTIONS,
@@ -82,7 +102,14 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
                             CONF_GITHUB_TOKEN,
                             self.config_entry.data.get(CONF_GITHUB_TOKEN, ""),
                         ),
-                    ): str,
+                    ): vol.All(
+                        selector.TextSelector(
+                            selector.TextSelectorConfig(
+                                type=selector.TextSelectorType.PASSWORD
+                            )
+                        ),
+                        validate_github_token,
+                    ),
                     vol.Optional(
                         CONF_UPDATE_INTERVAL,
                         default=self.config_entry.options.get(
