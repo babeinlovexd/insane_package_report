@@ -153,6 +153,11 @@ class InsanePackageUpdateEntity(CoordinatorEntity[GitHubPackageCoordinator], Upd
     @property
     def installed_version(self) -> str | None:
         """Version installed and in use."""
+        return self._installed_version
+
+    @callback
+    def _handle_coordinator_update(self) -> None:
+        """Handle updated data from the coordinator."""
         if self.coordinator.data:
             is_branch = self._ref in ["main", "master", "dev", "develop", ""]
             latest_version = self.coordinator.data.get("latest_version")
@@ -160,9 +165,11 @@ class InsanePackageUpdateEntity(CoordinatorEntity[GitHubPackageCoordinator], Upd
             if is_branch and latest_version and self._installed_version in ["main", "master", "dev", "develop", ""]:
                 self._installed_version = latest_version
                 self._stored_data[self._store_key] = self._installed_version
-                self.hass.async_create_task(self._store.async_save(self._stored_data))
+                if self.hass:
+                    self.hass.async_create_task(self._store.async_save(self._stored_data))
 
-        return self._installed_version
+        if self.hass:
+            super()._handle_coordinator_update()
 
     @property
     def latest_version(self) -> str | None:
@@ -197,5 +204,6 @@ class InsanePackageUpdateEntity(CoordinatorEntity[GitHubPackageCoordinator], Upd
 
             self._stored_data[self._store_key] = self._installed_version
 
-            self.hass.async_create_task(self._store.async_save(self._stored_data))
-            self.async_write_ha_state()
+            if self.hass:
+                self.hass.async_create_task(self._store.async_save(self._stored_data))
+                self.async_write_ha_state()
