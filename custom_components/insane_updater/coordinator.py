@@ -31,13 +31,18 @@ class GitHubPackageCoordinator(DataUpdateCoordinator):
         self.pkg_type = pkg_type
         self.session = async_get_clientsession(hass)
 
+        try:
+            self.owner, self.repo = parse_github_url(self.url)
+        except ValueError:
+            self.owner, self.repo = None, None
+
     async def _async_update_data(self) -> dict[str, Any]:
         """Fetch latest version from GitHub."""
 
-        try:
-            owner, repo = parse_github_url(self.url)
-        except ValueError as err:
-            raise UpdateFailed(str(err)) from err
+        if not self.owner or not self.repo:
+            raise UpdateFailed(f"Invalid GitHub URL: {self.url}")
+
+        owner, repo = self.owner, self.repo
 
         headers = {
             "Accept": "application/vnd.github.v3+json",

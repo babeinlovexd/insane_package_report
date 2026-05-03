@@ -110,7 +110,8 @@ class InsanePackageUpdateEntity(CoordinatorEntity[GitHubPackageCoordinator], Upd
         self._stored_data = stored_data
         self._sw_version = sw_version
 
-        self._store_key = f"{self._device_id}_{slugify(self._url)}"
+        url_slug = slugify(self._url)
+        self._store_key = f"{self._device_id}_{url_slug}"
         self._sw_store_key = f"sw_{self._device_id}"
 
         self._installed_version = self._stored_data.get(self._store_key)
@@ -131,7 +132,7 @@ class InsanePackageUpdateEntity(CoordinatorEntity[GitHubPackageCoordinator], Upd
         except ValueError:
             repo_name = self._url.split("/")[-1]
 
-        self._attr_unique_id = f"insane_updater_{self._device_id}_{slugify(self._url)}"
+        self._attr_unique_id = f"insane_updater_{self._device_id}_{url_slug}"
         self._attr_name = f"{repo_name} Update"
 
     @property
