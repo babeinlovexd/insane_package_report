@@ -1,13 +1,10 @@
 # https://github.com/babeinlovexd
 
-from __future__ import annotations
-
 import re
 from typing import Any
 
 import voluptuous as vol
 from homeassistant import config_entries, core
-from homeassistant.core import HomeAssistant
 from homeassistant.data_entry_flow import FlowResult
 
 from homeassistant.helpers import selector

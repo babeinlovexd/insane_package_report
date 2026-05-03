@@ -1,7 +1,5 @@
 # https://github.com/babeinlovexd
 
-from datetime import timedelta
-
 DOMAIN = "insane_updater"
 CONF_GITHUB_TOKEN = "github_token"
 CONF_UPDATE_INTERVAL = "update_interval"
