@@ -11,6 +11,10 @@ from custom_components.insane_updater.utils import parse_github_url
         ("github.com/owner/repo", ("owner", "repo")),
         ("owner/repo", ("owner", "repo")),
         ("owner/repo.git", ("owner", "repo")),
+        ("https://github.com/owner/repo?query=1", ("owner", "repo")),
+        ("https://github.com/owner/repo#fragment", ("owner", "repo")),
+        ("https://github.com/owner/repo/tree/main", ("owner", "repo")),
+        ("https://github.com/owner/repo.git?foo=bar", ("owner", "repo")),
     ],
 )
 def test_parse_github_url_valid(url, expected):
