@@ -9,7 +9,6 @@ from datetime import timedelta
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 
-from .const import DOMAIN
 from .utils import parse_github_url
 
 _LOGGER = logging.getLogger(__name__)
