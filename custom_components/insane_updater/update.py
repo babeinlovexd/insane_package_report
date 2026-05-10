@@ -144,7 +144,7 @@ class InsanePackageUpdateEntity(CoordinatorEntity[GitHubPackageCoordinator], Upd
         if device:
             if device.identifiers:
                 return {"identifiers": device.identifiers}
-            elif getattr(device, "connections", None):
+            if getattr(device, "connections", None):
                 return {"connections": device.connections}
 
         return {
