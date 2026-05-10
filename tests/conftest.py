@@ -12,6 +12,11 @@ def pytest_sessionstart(session):
         "homeassistant.helpers.device_registry",
         "homeassistant.helpers.dispatcher",
         "homeassistant.helpers.storage",
+        "esphome",
+        "esphome.codegen",
+        "esphome.config_validation",
+        "esphome.const",
+        "esphome.core",
     ]
     for module in mock_modules:
         sys.modules[module] = MagicMock()
