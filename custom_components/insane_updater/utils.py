@@ -1,5 +1,11 @@
 """Utility functions for Insane Updater."""
+import re
 from urllib.parse import urlparse
+
+# GitHub username and repository name rules:
+# Usernames can contain alphanumeric characters and hyphens (-), but cannot start or end with a hyphen.
+# Repository names can contain alphanumeric characters, hyphens (-), underscores (_), and dots (.).
+GITHUB_NAME_RE = re.compile(r"^[a-zA-Z0-9._-]+$")
 
 def parse_github_url(url: str) -> tuple[str, str]:
     """Parse GitHub URL to extract owner and repo.
@@ -44,5 +50,11 @@ def parse_github_url(url: str) -> tuple[str, str]:
 
     if repo.endswith(".git"):
         repo = repo[:-4]
+
+    if not GITHUB_NAME_RE.match(owner) or not GITHUB_NAME_RE.match(repo):
+        raise ValueError(f"Invalid characters in GitHub owner or repo: {owner}/{repo}")
+
+    if owner == ".." or repo == "..":
+        raise ValueError(f"Invalid GitHub owner or repo (path traversal): {owner}/{repo}")
 
     return owner, repo
