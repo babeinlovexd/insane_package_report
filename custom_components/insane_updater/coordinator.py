@@ -10,7 +10,7 @@ from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, Upda
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 
 from .const import COMMON_BRANCH_NAMES
-from .utils import parse_github_url
+from .utils import parse_github_url, GITHUB_NAME_RE
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -35,6 +35,17 @@ class GitHubPackageCoordinator(DataUpdateCoordinator):
             self.owner, self.repo = parse_github_url(self.url)
         except ValueError:
             self.owner, self.repo = None, None
+
+        if self.ref and self.ref not in COMMON_BRANCH_NAMES:
+            # ref can be a branch, tag or commit SHA.
+            # Usually it's alphanumeric with some special chars.
+            # We reuse GITHUB_NAME_RE but allow / for sub-branches like 'feature/something'
+            if not all(GITHUB_NAME_RE.match(part) for part in self.ref.split("/") if part):
+                _LOGGER.warning("Invalid characters in GitHub ref: %s", self.ref)
+                self.ref = None
+            elif ".." in self.ref:
+                _LOGGER.warning("Path traversal attempt in GitHub ref: %s", self.ref)
+                self.ref = None
 
     async def _async_update_data(self) -> dict[str, Any]:
         """Fetch latest version from GitHub."""
