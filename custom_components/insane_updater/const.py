@@ -10,3 +10,5 @@ EVENT_INSANE_PACKAGE_REPORT = "esphome.insane_package_report"
 SIGNAL_NEW_PACKAGE = f"{DOMAIN}_new_package"
 STORAGE_KEY = f"{DOMAIN}_storage"
 STORAGE_VERSION = 1
+
+COMMON_BRANCH_NAMES = {"main", "master", "dev", "develop", ""}

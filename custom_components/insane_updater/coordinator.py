@@ -9,6 +9,7 @@ from datetime import timedelta
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 
+from .const import COMMON_BRANCH_NAMES
 from .utils import parse_github_url
 
 _LOGGER = logging.getLogger(__name__)
@@ -54,7 +55,7 @@ class GitHubPackageCoordinator(DataUpdateCoordinator):
 
         try:
             if self.ref:
-                is_branch = self.ref in ["main", "master", "dev", "develop"]
+                is_branch = self.ref in COMMON_BRANCH_NAMES
 
                 if not is_branch:
                     tags_url = f"{api_url_base}/tags"

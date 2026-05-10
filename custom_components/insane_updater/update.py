@@ -18,7 +18,7 @@ from homeassistant.helpers import device_registry as dr
 from homeassistant.helpers.storage import Store
 from homeassistant.util import slugify
 
-from .const import DOMAIN, SIGNAL_NEW_PACKAGE
+from .const import COMMON_BRANCH_NAMES, DOMAIN, SIGNAL_NEW_PACKAGE
 from .coordinator import GitHubPackageCoordinator
 from .utils import parse_github_url
 
@@ -160,10 +160,10 @@ class InsanePackageUpdateEntity(CoordinatorEntity[GitHubPackageCoordinator], Upd
     def _handle_coordinator_update(self) -> None:
         """Handle updated data from the coordinator."""
         if self.coordinator.data:
-            is_branch = self._ref in ["main", "master", "dev", "develop", ""]
+            is_branch = self._ref in COMMON_BRANCH_NAMES
             latest_version = self.coordinator.data.get("latest_version")
 
-            if is_branch and latest_version and self._installed_version in ["main", "master", "dev", "develop", ""]:
+            if is_branch and latest_version and self._installed_version in COMMON_BRANCH_NAMES:
                 self._installed_version = latest_version
                 self._stored_data[self._store_key] = self._installed_version
                 if self.hass:
@@ -193,7 +193,7 @@ class InsanePackageUpdateEntity(CoordinatorEntity[GitHubPackageCoordinator], Upd
             self._sw_version = new_sw_version
             self._stored_data[self._sw_store_key] = new_sw_version
 
-            is_branch = self._ref in ["main", "master", "dev", "develop", ""]
+            is_branch = self._ref in COMMON_BRANCH_NAMES
 
             if is_branch:
                 self._installed_version = self._ref if self._ref else "main"
