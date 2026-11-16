@@ -5,6 +5,9 @@ esp32:
   framework:
     type: esp-idf
 logger:
+wifi:
+  ssid: ci-placeholder-only
+  password: ci-placeholder-only
 api:
 external_components:
   - source:
