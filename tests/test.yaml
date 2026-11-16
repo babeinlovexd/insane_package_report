@@ -9,6 +9,7 @@ wifi:
   ssid: ci-placeholder-only
   password: ci-placeholder-only
 api:
+  homeassistant_services: true
 external_components:
   - source:
       type: local
