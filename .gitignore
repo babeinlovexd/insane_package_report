@@ -2,3 +2,6 @@ venv/
 .esphome/
 test.yaml
 __pycache__/
+
+# Local build verification and CI staging
+release-output/

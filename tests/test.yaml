@@ -1,0 +1,14 @@
+esphome:
+  name: report-ci
+esp32:
+  board: esp32dev
+  framework:
+    type: esp-idf
+logger:
+api:
+external_components:
+  - source:
+      type: local
+      path: ../components
+    components: [insane_package_report]
+insane_package_report:
